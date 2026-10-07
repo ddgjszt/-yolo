@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>YOLO 实时推理 Web 演示</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        #result { margin-top: 20px; font-weight: bold; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>YOLO 目标检测 Web 接口测试</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">上传并检测</button>
+    <div id="result"></div>
+
+    <script>
+        async function uploadImage() {
+            const input = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+            if (!input.files[0]) { alert("请先选择一张图片！"); return; }
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            resultDiv.innerText = "正在检测，请稍候...";
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/detect/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                resultDiv.innerText = `检测完成！共发现 ${data.detections.length} 个目标。\n` + JSON.stringify(data.detections, null, 2);
+            } catch (error) {
+                resultDiv.innerText = "请求失败，请确保后端已启动！";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
